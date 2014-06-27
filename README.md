@@ -1,16 +1,8 @@
-omniauth-irm_health
-===================
-
-an omniauth strategy for IRM Cloud Healthcare
+An omniauth strategy for IRM Cloud Healthcare
 
 ** Copied from OmniAuth Facebook. This is not for Facebook !! 
 If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
 We do appologize inconvenience.
-
-
-
-**IMPORTANT: If you're running < 1.5.1, please upgrade to address 2 security vulnerabilities.
-More details [here](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) and [here](https://github.com/mkdynamic/omniauth-facebook/wiki/Access-token-vulnerability:-CVE-2013-4593).**
 
 
 # OmniAuth IrmHealth  &nbsp;[![Build Status]]

@@ -1,22 +1,22 @@
-**IMPORTANT: If you're running < 1.5.1, please upgrade to address 2 security vulnerabilities.
-More details [here](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) and [here](https://github.com/mkdynamic/omniauth-facebook/wiki/Access-token-vulnerability:-CVE-2013-4593).**
+An omniauth strategy for IRM Cloud Healthcare
 
----
+** Copied from OmniAuth Facebook. This is not for Facebook !! 
+If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
+We do appologize inconvenience.
 
-# OmniAuth Facebook &nbsp;[![Build Status](https://secure.travis-ci.org/mkdynamic/omniauth-facebook.png?branch=master)](https://travis-ci.org/mkdynamic/omniauth-facebook)
+
+# OmniAuth IrmHealth  &nbsp;[![Build Status]]
 
 **These notes are based on master, please see tags for README pertaining to specific releases.**
 
-Facebook OAuth2 Strategy for OmniAuth.
-
-Supports the OAuth 2.0 server-side and client-side flows. Read the Facebook docs for more details: http://developers.facebook.com/docs/authentication
+IrmHealth OAuth2 Strategy for OmniAuth.
 
 ## Installing
 
 Add to your `Gemfile`:
 
 ```ruby
-gem 'omniauth-facebook'
+gem 'omniauth-irm_health'
 ```
 
 Then `bundle install`.
@@ -29,11 +29,9 @@ Here's a quick example, adding the middleware to a Rails app in `config/initiali
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET']
+  provider :facebook, ENV['IRM_KEY'], ENV['IRM_SECRET']
 end
 ```
-
-[See the example Sinatra app for full examples](https://github.com/mkdynamic/omniauth-facebook/blob/master/example/config.ru) of both the server and client-side flows (including using the Facebook Javascript SDK).
 
 ## Configuring
 
@@ -166,3 +164,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mkdynamic/omniauth-facebook/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
+=======

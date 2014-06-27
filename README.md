@@ -3,7 +3,9 @@ omniauth-irm_health
 
 an omniauth strategy for IRM Cloud Healthcare
 
-=====
+** Copied from OmniAuth Facebook. This is not for Facebook !! 
+If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
+We do appologize inconvenience.
 
 
 
@@ -11,11 +13,11 @@ an omniauth strategy for IRM Cloud Healthcare
 More details [here](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) and [here](https://github.com/mkdynamic/omniauth-facebook/wiki/Access-token-vulnerability:-CVE-2013-4593).**
 
 
-# OmniAuth Facebook &nbsp;[![Build Status](https://secure.travis-ci.org/mkdynamic/omniauth-facebook.png?branch=master)](https://travis-ci.org/mkdynamic/omniauth-facebook)
+# OmniAuth IrmHealth  &nbsp;[![Build Status]]
 
 **These notes are based on master, please see tags for README pertaining to specific releases.**
 
-Facebook OAuth2 Strategy for OmniAuth.
+IrmHealth OAuth2 Strategy for OmniAuth.
 
 Supports the OAuth 2.0 server-side and client-side flows. Read the Facebook docs for more details: http://developers.facebook.com/docs/authentication
 

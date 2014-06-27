@@ -1,7 +1,6 @@
 **IMPORTANT: If you're running < 1.5.1, please upgrade to address 2 security vulnerabilities.
 More details [here](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) and [here](https://github.com/mkdynamic/omniauth-facebook/wiki/Access-token-vulnerability:-CVE-2013-4593).**
 
----
 
 # OmniAuth Facebook &nbsp;[![Build Status](https://secure.travis-ci.org/mkdynamic/omniauth-facebook.png?branch=master)](https://travis-ci.org/mkdynamic/omniauth-facebook)
 
@@ -166,3 +165,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mkdynamic/omniauth-facebook/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
+=======
+omniauth-irm_health
+===================
+
+an omniauth strategy for IRM Cloud Healthcare
+>>>>>>> 33fc0d1edba327ec93c9886fae93d66ad547ae35

@@ -11,14 +11,12 @@ We do appologize inconvenience.
 
 IrmHealth OAuth2 Strategy for OmniAuth.
 
-Supports the OAuth 2.0 server-side and client-side flows. Read the Facebook docs for more details: http://developers.facebook.com/docs/authentication
-
 ## Installing
 
 Add to your `Gemfile`:
 
 ```ruby
-gem 'omniauth-facebook'
+gem 'omniauth-irm_health'
 ```
 
 Then `bundle install`.
@@ -31,11 +29,9 @@ Here's a quick example, adding the middleware to a Rails app in `config/initiali
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET']
+  provider :facebook, ENV['IRM_KEY'], ENV['IRM_SECRET']
 end
 ```
-
-[See the example Sinatra app for full examples](https://github.com/mkdynamic/omniauth-facebook/blob/master/example/config.ru) of both the server and client-side flows (including using the Facebook Javascript SDK).
 
 ## Configuring
 

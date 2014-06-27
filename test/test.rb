@@ -260,7 +260,7 @@ class RawInfoTest < StrategyTestCase
     @options = {:appsecret_proof => @appsecret_proof}
   end
 
-  test "performs a GET to #{IRM_AUTH_BASE_URL}/me" do
+  test "performs a GET to IRM_AUTH_BASE_URL/me" do
     strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
     strategy.stubs(:access_token).returns(@access_token)
     params = {:params => @options}

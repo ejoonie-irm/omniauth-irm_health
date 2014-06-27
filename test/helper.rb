@@ -46,7 +46,7 @@ class StrategyTestCase < TestCase
   def strategy
     @strategy ||= begin
       args = [@client_id, @client_secret, @options].compact
-      OmniAuth::Strategies::Facebook.new(nil, *args).tap do |strategy|
+      OmniAuth::Strategies::IrmHealth.new(nil, *args).tap do |strategy|
         strategy.stubs(:request).returns(@request)
       end
     end

@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    omniauth-facebook (2.0.0.pre1)
+    omniauth-irm_health (0.0.1)
       omniauth-oauth2 (~> 1.1)
 
 GEM
@@ -54,6 +54,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  omniauth-facebook!
+  omniauth-irm_health!
   sinatra
   sinatra-reloader

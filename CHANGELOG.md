@@ -1,3 +1,9 @@
+## 0.1.1 (2014-06-27)
+Changes:
+
+  - test version gem originated from omniauth-facebook (https://github.com/mkdynamic/omniauth-facebook)
+
+
 ## 1.6.0 (2014-01-13)
 
 Features:

@@ -1,47 +1,49 @@
 require 'helper'
-require 'omniauth-facebook'
+require 'omniauth-irm_health'
 require 'openssl'
 require 'base64'
 
 class StrategyTest < StrategyTestCase
   include OAuth2StrategyTests
+    IRM_AUTH_BASE_URL = 'http://localhost:4000'
+    IRM_OPHIES_BASE_URL = 'http://localhost:3000'
 end
 
 class ClientTest < StrategyTestCase
-  test 'has correct Facebook site' do
-    assert_equal 'https://graph.facebook.com', strategy.client.site
+  test 'has correct IrmHealth(Ophies) site' do
+    assert_equal IRM_AUTH_BASE_URL, strategy.client.site
   end
 
   test 'has correct authorize url' do
-    assert_equal 'https://www.facebook.com/dialog/oauth', strategy.client.options[:authorize_url]
+    assert_equal '/o/auth2/auth', strategy.client.options[:authorize_url]
   end
 
   test 'has correct token url' do
-    assert_equal '/oauth/access_token', strategy.client.options[:token_url]
+    assert_equal '/o/auth2/token', strategy.client.options[:token_url]
   end
 end
 
 class CallbackUrlTest < StrategyTestCase
   test "returns the default callback url" do
-    url_base = 'http://auth.request.com'
+    url_base = IRM_OPHIES_BASE_URL
     @request.stubs(:url).returns("#{url_base}/some/page")
     strategy.stubs(:script_name).returns('') # as not to depend on Rack env
-    assert_equal "#{url_base}/auth/facebook/callback", strategy.callback_url
+    assert_equal "#{IRM_OPHIES_BASE_URL}/o/auth/oauth2", strategy.callback_url
   end
 
-  test "returns path from callback_path option" do
-    @options = { :callback_path => "/auth/FB/done"}
-    url_base = 'http://auth.request.com'
-    @request.stubs(:url).returns("#{url_base}/page/path")
-    strategy.stubs(:script_name).returns('') # as not to depend on Rack env
-    assert_equal "#{url_base}/auth/FB/done", strategy.callback_url
-  end
+  # test "returns path from callback_path option" do
+  #   @options = { :callback_path => "/auth/FB/done" }
+  #   url_base = 'http://auth.request.com'
+  #   @request.stubs(:url).returns("#{url_base}/page/path")
+  #   strategy.stubs(:script_name).returns('') # as not to depend on Rack env
+  #   assert_equal "#{url_base}/auth/FB/done", strategy.callback_url
+  # end
 
-  test "returns url from callback_url option" do
-    url = 'https://auth.myapp.com/auth/fb/callback'
-    @options = { :callback_url => url }
-    assert_equal url, strategy.callback_url
-  end
+  # test "returns url from callback_url option" do
+  #   url = 'https://auth.myapp.com/auth/fb/callback'
+  #   @options = { :callback_url => url }
+  #   assert_equal url, strategy.callback_url
+  # end
 end
 
 class AuthorizeParamsTest < StrategyTestCase
@@ -50,45 +52,52 @@ class AuthorizeParamsTest < StrategyTestCase
     assert_equal 'email', strategy.authorize_params[:scope]
   end
 
-  test 'includes display parameter from request when present' do
-    @request.stubs(:params).returns({ 'display' => 'touch' })
-    assert strategy.authorize_params.is_a?(Hash)
-    assert_equal 'touch', strategy.authorize_params[:display]
+  test 'includes default access type as offline' do
+      assert strategy.authorize_params.is_a? Hash
+      assert_equal 'offline', strategy.authorize_params[:access_type]
   end
 
-  test 'includes auth_type parameter from request when present' do
-    @request.stubs(:params).returns({ 'auth_type' => 'reauthenticate' })
-    assert strategy.authorize_params.is_a?(Hash)
-    assert_equal 'reauthenticate', strategy.authorize_params[:auth_type]
-  end
+  # test 'includes display parameter from request when present' do
+  #   @request.stubs(:params).returns({ 'display' => 'touch' })
+  #   assert strategy.authorize_params.is_a?(Hash)
+  #   assert_equal 'touch', strategy.authorize_params[:display]
+  # end
 
-  test 'overrides default scope with parameter passed from request' do
-    @request.stubs(:params).returns({ 'scope' => 'email' })
-    assert strategy.authorize_params.is_a?(Hash)
-    assert_equal 'email', strategy.authorize_params[:scope]
-  end
+  # test 'includes auth_type parameter from request when present' do
+  #   @request.stubs(:params).returns({ 'auth_type' => 'reauthenticate' })
+  #   assert strategy.authorize_params.is_a?(Hash)
+  #   assert_equal 'reauthenticate', strategy.authorize_params[:auth_type]
+  # end
+
+  # test 'overrides default scope with parameter passed from request' do
+  #   @request.stubs(:params).returns({ 'scope' => 'email' })
+  #   assert strategy.authorize_params.is_a?(Hash)
+  #   assert_equal 'email', strategy.authorize_params[:scope]
+  # end
 end
 
-class TokeParamsTest < StrategyTestCase
-  test 'has correct parse strategy' do
-    assert_equal :query, strategy.token_params[:parse]
-  end
-end
+# N/A
+# class TokenParamsTest < StrategyTestCase
+#   test 'has correct parse strategy' do
+#     assert_equal :query, strategy.token_params[:parse]
+#   end
+# end
 
-class AccessTokenOptionsTest < StrategyTestCase
-  test 'has correct param name by default' do
-    assert_equal 'access_token', strategy.access_token_options[:param_name]
-  end
-
-  test 'has correct header format by default' do
-    assert_equal 'OAuth %s', strategy.access_token_options[:header_format]
-  end
-end
+# N/A
+# class AccessTokenOptionsTest < StrategyTestCase
+#   test 'has correct param name by default' do
+#     assert_equal 'access_token', strategy.access_token_options[:param_name]
+#   end
+#
+#   test 'has correct header format by default' do
+#     assert_equal 'OAuth %s', strategy.access_token_options[:header_format]
+#   end
+# end
 
 class UidTest < StrategyTestCase
   def setup
     super
-    strategy.stubs(:raw_info).returns({ 'id' => '123' })
+    strategy.stubs(:raw_info).returns({ 'uid' => '123' })
   end
 
   test 'returns the id from raw_info' do
@@ -97,105 +106,110 @@ class UidTest < StrategyTestCase
 end
 
 class InfoTest < StrategyTestCase
-  test 'returns the secure facebook avatar url when `secure_image_url` option is specified' do
-    @options = { :secure_image_url => true }
-    raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
-    strategy.stubs(:raw_info).returns(raw_info)
-    assert_equal 'https://graph.facebook.com/321/picture', strategy.info['image']
+  test 'contains username and email' do
+    strategy.stubs(:raw_info).returns({ username: 'user01', email: 'test01@irm.kr'})
   end
 
-  test 'returns the image with size specified in the `image_size` option' do
-    @options = { :image_size => 'normal' }
-    raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
-    strategy.stubs(:raw_info).returns(raw_info)
-    assert_equal 'http://graph.facebook.com/321/picture?type=normal', strategy.info['image']
-  end
 
-  test 'returns the image with width and height specified in the `image_size` option' do
-    @options = { :image_size => { :width => 123, :height => 987 } }
-    raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
-    strategy.stubs(:raw_info).returns(raw_info)
-    assert_match 'width=123', strategy.info['image']
-    assert_match 'height=987', strategy.info['image']
-    assert_match 'http://graph.facebook.com/321/picture?', strategy.info['image']
-  end
+  # test 'returns the secure facebook avatar url when `secure_image_url` option is specified' do
+  #   @options = { :secure_image_url => true }
+  #   raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
+  #   strategy.stubs(:raw_info).returns(raw_info)
+  #   assert_equal 'https://graph.facebook.com/321/picture', strategy.info['image']
+  # end
+
+  # test 'returns the image with size specified in the `image_size` option' do
+  #   @options = { :image_size => 'normal' }
+  #   raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
+  #   strategy.stubs(:raw_info).returns(raw_info)
+  #   assert_equal 'http://graph.facebook.com/321/picture?type=normal', strategy.info['image']
+  # end
+  #
+  # test 'returns the image with width and height specified in the `image_size` option' do
+  #   @options = { :image_size => { :width => 123, :height => 987 } }
+  #   raw_info = { 'name' => 'Fred Smith', 'id' => '321' }
+  #   strategy.stubs(:raw_info).returns(raw_info)
+  #   assert_match 'width=123', strategy.info['image']
+  #   assert_match 'height=987', strategy.info['image']
+  #   assert_match 'http://graph.facebook.com/321/picture?', strategy.info['image']
+  # end
 end
 
 class InfoTestOptionalDataPresent < StrategyTestCase
   def setup
     super
-    @raw_info ||= { 'name' => 'Fred Smith' }
+    @raw_info ||= { 'username' => 'Fred Smith' }
     strategy.stubs(:raw_info).returns(@raw_info)
   end
 
-  test 'returns the name' do
-    assert_equal 'Fred Smith', strategy.info['name']
+  test 'returns the username' do
+    assert_equal 'Fred Smith', strategy.info['username']
   end
 
   test 'returns the email' do
-    @raw_info['email'] = 'fred@smith.com'
-    assert_equal 'fred@smith.com', strategy.info['email']
+    @raw_info['email'] = 'test01@irm.kr'
+    assert_equal 'test01@irm.kr', strategy.info['email']
   end
 
-  test 'returns the username as nickname' do
-    @raw_info['username'] = 'fredsmith'
-    assert_equal 'fredsmith', strategy.info['nickname']
-  end
+  # test 'returns the username as nickname' do
+  #   @raw_info['username'] = 'fredsmith'
+  #   assert_equal 'fredsmith', strategy.info['nickname']
+  # end
 
-  test 'returns the first name' do
-    @raw_info['first_name'] = 'Fred'
-    assert_equal 'Fred', strategy.info['first_name']
-  end
-
-  test 'returns the last name' do
-    @raw_info['last_name'] = 'Smith'
-    assert_equal 'Smith', strategy.info['last_name']
-  end
-
-  test 'returns the location name as location' do
-    @raw_info['location'] = { 'id' => '104022926303756', 'name' => 'Palo Alto, California' }
-    assert_equal 'Palo Alto, California', strategy.info['location']
-  end
-
-  test 'returns bio as description' do
-    @raw_info['bio'] = 'I am great'
-    assert_equal 'I am great', strategy.info['description']
-  end
-
-  test 'returns the facebook avatar url' do
-    @raw_info['id'] = '321'
-    assert_equal 'http://graph.facebook.com/321/picture', strategy.info['image']
-  end
-
-  test 'returns the Facebook link as the Facebook url' do
-    @raw_info['link'] = 'http://www.facebook.com/fredsmith'
-    assert_kind_of Hash, strategy.info['urls']
-    assert_equal 'http://www.facebook.com/fredsmith', strategy.info['urls']['Facebook']
-  end
-
-  test 'returns website url' do
-    @raw_info['website'] = 'https://my-wonderful-site.com'
-    assert_kind_of Hash, strategy.info['urls']
-    assert_equal 'https://my-wonderful-site.com', strategy.info['urls']['Website']
-  end
-
-  test 'return both Facebook link and website urls' do
-    @raw_info['link'] = 'http://www.facebook.com/fredsmith'
-    @raw_info['website'] = 'https://my-wonderful-site.com'
-    assert_kind_of Hash, strategy.info['urls']
-    assert_equal 'http://www.facebook.com/fredsmith', strategy.info['urls']['Facebook']
-    assert_equal 'https://my-wonderful-site.com', strategy.info['urls']['Website']
-  end
-
-  test 'returns the positive verified status' do
-    @raw_info['verified'] = true
-    assert strategy.info['verified']
-  end
-
-  test 'returns the negative verified status' do
-    @raw_info['verified'] = false
-    refute strategy.info['verified']
-  end
+  # test 'returns the first name' do
+  #   @raw_info['first_name'] = 'Fred'
+  #   assert_equal 'Fred', strategy.info['first_name']
+  # end
+  #
+  # test 'returns the last name' do
+  #   @raw_info['last_name'] = 'Smith'
+  #   assert_equal 'Smith', strategy.info['last_name']
+  # end
+  #
+  # test 'returns the location name as location' do
+  #   @raw_info['location'] = { 'id' => '104022926303756', 'name' => 'Palo Alto, California' }
+  #   assert_equal 'Palo Alto, California', strategy.info['location']
+  # end
+  #
+  # test 'returns bio as description' do
+  #   @raw_info['bio'] = 'I am great'
+  #   assert_equal 'I am great', strategy.info['description']
+  # end
+  #
+  # test 'returns the facebook avatar url' do
+  #   @raw_info['id'] = '321'
+  #   assert_equal 'http://graph.facebook.com/321/picture', strategy.info['image']
+  # end
+  #
+  # test 'returns the Facebook link as the Facebook url' do
+  #   @raw_info['link'] = 'http://www.facebook.com/fredsmith'
+  #   assert_kind_of Hash, strategy.info['urls']
+  #   assert_equal 'http://www.facebook.com/fredsmith', strategy.info['urls']['Facebook']
+  # end
+  #
+  # test 'returns website url' do
+  #   @raw_info['website'] = 'https://my-wonderful-site.com'
+  #   assert_kind_of Hash, strategy.info['urls']
+  #   assert_equal 'https://my-wonderful-site.com', strategy.info['urls']['Website']
+  # end
+  #
+  # test 'return both Facebook link and website urls' do
+  #   @raw_info['link'] = 'http://www.facebook.com/fredsmith'
+  #   @raw_info['website'] = 'https://my-wonderful-site.com'
+  #   assert_kind_of Hash, strategy.info['urls']
+  #   assert_equal 'http://www.facebook.com/fredsmith', strategy.info['urls']['Facebook']
+  #   assert_equal 'https://my-wonderful-site.com', strategy.info['urls']['Website']
+  # end
+  #
+  # test 'returns the positive verified status' do
+  #   @raw_info['verified'] = true
+  #   assert strategy.info['verified']
+  # end
+  #
+  # test 'returns the negative verified status' do
+  #   @raw_info['verified'] = false
+  #   refute strategy.info['verified']
+  # end
 end
 
 class InfoTestOptionalDataNotPresent < StrategyTestCase
@@ -246,7 +260,7 @@ class RawInfoTest < StrategyTestCase
     @options = {:appsecret_proof => @appsecret_proof}
   end
 
-  test 'performs a GET to https://graph.facebook.com/me' do
+  test "performs a GET to #{IRM_AUTH_BASE_URL}/me" do
     strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
     strategy.stubs(:access_token).returns(@access_token)
     params = {:params => @options}
@@ -254,23 +268,23 @@ class RawInfoTest < StrategyTestCase
     strategy.raw_info
   end
 
-  test 'performs a GET to https://graph.facebook.com/me with locale' do
-    @options.merge!({ :locale => 'cs_CZ' })
-    strategy.stubs(:access_token).returns(@access_token)
-    strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
-    params = {:params => @options}
-    @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
-    strategy.raw_info
-  end
-
-  test 'performs a GET to https://graph.facebook.com/me with info_fields' do
-    @options.merge!({:info_fields => 'about'})
-    strategy.stubs(:access_token).returns(@access_token)
-    strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
-    params = {:params => {:appsecret_proof => @appsecret_proof, :fields => 'about'}}
-    @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
-    strategy.raw_info
-  end
+  # test 'performs a GET to https://graph.facebook.com/me with locale' do
+  #   @options.merge!({ :locale => 'cs_CZ' })
+  #   strategy.stubs(:access_token).returns(@access_token)
+  #   strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
+  #   params = {:params => @options}
+  #   @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
+  #   strategy.raw_info
+  # end
+  #
+  # test 'performs a GET to https://graph.facebook.com/me with info_fields' do
+  #   @options.merge!({:info_fields => 'about'})
+  #   strategy.stubs(:access_token).returns(@access_token)
+  #   strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
+  #   params = {:params => {:appsecret_proof => @appsecret_proof, :fields => 'about'}}
+  #   @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
+  #   strategy.raw_info
+  # end
 
   test 'returns a Hash' do
     strategy.stubs(:access_token).returns(@access_token)
@@ -362,13 +376,13 @@ class ExtraTest < StrategyTestCase
     strategy.stubs(:raw_info).returns(@raw_info)
   end
 
-  test 'returns a Hash' do
-    assert_kind_of Hash, strategy.extra
+  test 'returns no extra' do
+    assert_equal nil, strategy.extra
   end
 
-  test 'contains raw info' do
-    assert_equal({ 'raw_info' => @raw_info }, strategy.extra)
-  end
+  # test 'contains raw info' do
+  #   assert_equal({ 'raw_info' => @raw_info }, strategy.extra)
+  # end
 end
 
 module SignedRequestHelpers
@@ -415,14 +429,14 @@ module SignedRequestTests
       @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
     end
 
-    test 'parses the access code out from the cookie' do
-      assert_equal @payload, strategy.send(:signed_request_from_cookie)
-    end
+    # test 'parses the access code out from the cookie' do
+    #   assert_equal @payload, strategy.send(:signed_request_from_cookie)
+    # end
 
-    test 'throws an error if the algorithm is unknown' do
-      setup('UNKNOWN-ALGO')
-      assert_equal "unknown algorithm: UNKNOWN-ALGO", assert_raises(OmniAuth::Strategies::Facebook::UnknownSignatureAlgorithmError) { strategy.send(:signed_request_from_cookie) }.message
-    end
+    # test 'throws an error if the algorithm is unknown' do
+    #   setup('UNKNOWN-ALGO')
+    #   assert_equal "unknown algorithm: UNKNOWN-ALGO", assert_raises(OmniAuth::Strategies::Facebook::UnknownSignatureAlgorithmError) { strategy.send(:signed_request_from_cookie) }.message
+    # end
   end
 
   class EmptySignedRequestTest < TestCase
@@ -431,9 +445,9 @@ module SignedRequestTests
       @request.stubs(:params).returns({'signed_request' => ''})
     end
 
-    test 'empty param' do
-      assert_equal nil, strategy.send(:signed_request_from_cookie)
-    end
+    # test 'empty param' do
+    #   assert_equal nil, strategy.send(:signed_request_from_cookie)
+    # end
   end
 
   class MissingCodeInParamsRequestTest < TestCase
@@ -442,10 +456,10 @@ module SignedRequestTests
       @request.stubs(:params).returns({})
     end
 
-    test 'calls fail! when a code is not included in the params' do
-      strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
-      strategy.callback_phase
-    end
+    # test 'calls fail! when a code is not included in the params' do
+    #   strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
+    #   strategy.callback_phase
+    # end
   end
 
   class MissingCodeInCookieRequestTest < TestCase
@@ -461,9 +475,9 @@ module SignedRequestTests
       @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
     end
 
-    test 'calls fail! when a code is not included in the cookie' do
-      strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
-      strategy.callback_phase
-    end
+    # test 'calls fail! when a code is not included in the cookie' do
+    #   strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
+    #   strategy.callback_phase
+    # end
   end
 end

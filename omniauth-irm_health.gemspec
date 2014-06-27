@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path('../lib', __FILE__)
-require 'omniauth/facebook/version'
+require 'omniauth/irm_health/version'
 
 Gem::Specification.new do |s|
-  s.name     = 'omniauth-facebook'
-  s.version  = OmniAuth::Facebook::VERSION
-  s.authors  = ['Mark Dodwell', 'Josef Šimánek']
-  s.email    = ['mark@madeofcode.com', 'retro@ballgag.cz']
-  s.summary  = 'Facebook OAuth2 Strategy for OmniAuth'
-  s.homepage = 'https://github.com/mkdynamic/omniauth-facebook'
+  s.name     = 'omniauth-irm_health'
+  s.version  = OmniAuth::IrmHealth::VERSION
+  s.authors  = ['Youngjoon Choi']
+  s.email    = ['ejoonie@irm.kr']
+  s.summary  = 'Irm Health OAuth2 Strategy for OmniAuth'
+  s.homepage = 'https://github.com/irm/omniauth-irm_health'
   s.license  = 'MIT'
 
   s.files         = `git ls-files`.split("\n")

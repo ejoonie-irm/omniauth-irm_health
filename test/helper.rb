@@ -31,10 +31,14 @@ class TestCase < Minitest::Test
 end
 
 class StrategyTestCase < TestCase
+    IRM_AUTH_BASE_URL = 'http://localhost:4000'
+    IRM_OPHIES_BASE_URL = 'http://localhost:3000'
+
   def setup
-    @request = stub('Request')
+
+    @request = stubs('Request')
     @request.stubs(:params).returns({})
-    @request.stubs(:cookies).returns({})
+    # @request.stubs(:cookies).returns({})
     @request.stubs(:env).returns({})
     @request.stubs(:scheme).returns({})
     @request.stubs(:ssl?).returns(false)

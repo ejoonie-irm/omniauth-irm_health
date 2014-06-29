@@ -11,6 +11,7 @@ module OmniAuth
       class UnknownSignatureAlgorithmError < NotImplementedError; end
 
       BASE_SCOPE_URL = 'http://localhost:4000' # FIXME
+      OPHIES_BASE_URL = "http://localhost:3000"
       BASE_SCOPES = %w[email profile study]
       DEFAULT_SCOPE = 'email'
       DEFAULT_ACCESS_TYPE = 'offline'
@@ -20,7 +21,7 @@ module OmniAuth
       option :authorize_options, [:scope, :access_type, :state]
 
       option :client_options, {
-        :site => 'http://localhost:4000', # FIXME
+        :site => BASE_SCOPE_URL, # FIXME
         :authorize_url => '/o/oauth2/auth',
         :token_url => '/o/oauth2/token'
       }
@@ -59,7 +60,7 @@ module OmniAuth
             # image
             # phone
             # urls: { study: https://ophies.irm.kr/v1/studies }
-          'nickname' => raw_info['username'],
+          'name' => raw_info['username'],
           'email' => raw_info['email'],
           'urls' => { 'Irm' => raw_info[''] }
         })
@@ -71,11 +72,11 @@ module OmniAuth
       # end
 
       # no extra for irm_health
-      # extra do                      # provider specific info
-      #   hash = {}
-      #   hash['raw_info'] = raw_info unless skip_info?
-      #   prune! hash
-      # end
+      extra do                      # provider specific info
+        hash = {}
+        hash['raw_info'] = raw_info unless skip_info?
+        prune! hash
+      end
 
       def raw_info
         @raw_info ||= access_token.get('/me').parsed
@@ -99,15 +100,8 @@ module OmniAuth
         fail!(:unknown_signature_algoruthm, e)
       end
 
-      # NOTE If we're using code from the signed request then FB sets the redirect_uri to '' during the authorize
-      #      phase and it must match during the access_token phase:
-      #      https://github.com/facebook/facebook-php-sdk/blob/master/src/base_facebook.php#L477
       def callback_url
-        if @authorization_code_from_signed_request_in_cookie
-          ''
-        else
-          options[:callback_url] || super
-        end
+        "#{OPHIES_BASE_URL}/auth/oauth2/irm_health/callback"
       end
 
       # def access_token_options
@@ -127,10 +121,10 @@ module OmniAuth
           end
 
           params[:scope] ||= DEFAULT_SCOPE
-        end
-
           params[:access_type] = DEFAULT_ACCESS_TYPE if params[:access_type].nil?
           session['omniauth.state'] = params[:state] if params[:state]
+
+        end
       end
 
 

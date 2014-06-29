@@ -5,8 +5,6 @@ require 'base64'
 
 class StrategyTest < StrategyTestCase
   include OAuth2StrategyTests
-    IRM_AUTH_BASE_URL = 'http://localhost:4000'
-    IRM_OPHIES_BASE_URL = 'http://localhost:3000'
 end
 
 class ClientTest < StrategyTestCase
@@ -15,20 +13,22 @@ class ClientTest < StrategyTestCase
   end
 
   test 'has correct authorize url' do
-    assert_equal '/o/auth2/auth', strategy.client.options[:authorize_url]
+    assert_equal '/o/oauth2/auth', strategy.client.options[:authorize_url]
   end
 
   test 'has correct token url' do
-    assert_equal '/o/auth2/token', strategy.client.options[:token_url]
+    assert_equal '/o/oauth2/token', strategy.client.options[:token_url]
   end
 end
 
 class CallbackUrlTest < StrategyTestCase
   test "returns the default callback url" do
     url_base = IRM_OPHIES_BASE_URL
+    callback_url = "#{IRM_OPHIES_BASE_URL}/auth/oauth2/irm_health/callback"
+
     @request.stubs(:url).returns("#{url_base}/some/page")
     strategy.stubs(:script_name).returns('') # as not to depend on Rack env
-    assert_equal "#{IRM_OPHIES_BASE_URL}/o/auth/oauth2", strategy.callback_url
+    assert_equal callback_url, strategy.callback_url
   end
 
   # test "returns path from callback_path option" do
@@ -143,7 +143,7 @@ class InfoTestOptionalDataPresent < StrategyTestCase
   end
 
   test 'returns the username' do
-    assert_equal 'Fred Smith', strategy.info['username']
+    assert_equal 'Fred Smith', strategy.info['name']
   end
 
   test 'returns the email' do
@@ -263,8 +263,9 @@ class RawInfoTest < StrategyTestCase
   test "performs a GET to IRM_AUTH_BASE_URL/me" do
     strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
     strategy.stubs(:access_token).returns(@access_token)
-    params = {:params => @options}
-    @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
+    # params = {:params => @options}
+    # @access_token.expects(:get).with('/me', params).returns(stub_everything('OAuth2::Response'))
+    @access_token.expects(:get).with('/me').returns(stub_everything('OAuth2::Response'))
     strategy.raw_info
   end
 
@@ -294,8 +295,8 @@ class RawInfoTest < StrategyTestCase
     raw_response.stubs(:status).returns(200)
     raw_response.stubs(:headers).returns({'Content-Type' => 'application/json' })
     oauth2_response = OAuth2::Response.new(raw_response)
-    params = {:params => @options}
-    @access_token.stubs(:get).with('/me', params).returns(oauth2_response)
+    # params = {:params => @options}
+    @access_token.stubs(:get).with('/me').returns(oauth2_response)
     assert_kind_of Hash, strategy.raw_info
     assert_equal 'thar', strategy.raw_info['ohai']
   end
@@ -304,8 +305,8 @@ class RawInfoTest < StrategyTestCase
     strategy.stubs(:access_token).returns(@access_token)
     strategy.stubs(:appsecret_proof).returns(@appsecret_proof)
     oauth2_response = stub('OAuth2::Response', :parsed => false)
-    params = {:params => @options}
-    @access_token.stubs(:get).with('/me', params).returns(oauth2_response)
+    # params = {:params => @options}
+    @access_token.stubs(:get).with('/me').returns(oauth2_response)
     assert_kind_of Hash, strategy.raw_info
     assert_equal({}, strategy.raw_info)
   end
@@ -376,108 +377,109 @@ class ExtraTest < StrategyTestCase
     strategy.stubs(:raw_info).returns(@raw_info)
   end
 
-  test 'returns no extra' do
-    assert_equal nil, strategy.extra
+  test 'extra is not empty' do
+    refute_empty(strategy.extra)
   end
 
-  # test 'contains raw info' do
-  #   assert_equal({ 'raw_info' => @raw_info }, strategy.extra)
-  # end
-end
-
-module SignedRequestHelpers
-  def signed_request(payload, secret)
-    encoded_payload = base64_encode_url(MultiJson.encode(payload))
-    encoded_signature = base64_encode_url(signature(encoded_payload, secret))
-    [encoded_signature, encoded_payload].join('.')
-  end
-
-  def base64_encode_url(value)
-    Base64.encode64(value).tr('+/', '-_').gsub(/\n/, '')
-  end
-
-  def signature(payload, secret, algorithm = OpenSSL::Digest::SHA256.new)
-    OpenSSL::HMAC.digest(algorithm, secret, payload)
+  test 'contains raw info' do
+    assert_has_key "raw_info", strategy.extra
+    assert_equal({ 'raw_info' => @raw_info }, strategy.extra)
   end
 end
+
+# module SignedRequestHelpers
+#   def signed_request(payload, secret)
+#     encoded_payload = base64_encode_url(MultiJson.encode(payload))
+#     encoded_signature = base64_encode_url(signature(encoded_payload, secret))
+#     [encoded_signature, encoded_payload].join('.')
+#   end
+#
+#   def base64_encode_url(value)
+#     Base64.encode64(value).tr('+/', '-_').gsub(/\n/, '')
+#   end
+#
+#   def signature(payload, secret, algorithm = OpenSSL::Digest::SHA256.new)
+#     OpenSSL::HMAC.digest(algorithm, secret, payload)
+#   end
+# end
 
 module SignedRequestTests
-  class TestCase < StrategyTestCase
-    include SignedRequestHelpers
-  end
+  # class TestCase < StrategyTestCase
+  #   include SignedRequestHelpers
+  # end
 
-  class CookieAndParamNotPresentTest < TestCase
-    test 'is nil' do
-      assert_nil strategy.send(:signed_request_from_cookie)
-    end
+  # class CookieAndParamNotPresentTest < TestCase
+  #   test 'is nil' do
+  #     assert_nil strategy.send(:signed_request_from_cookie)
+  #   end
+  #
+  #   test 'throws an error on calling build_access_token' do
+  #     assert_raises(OmniAuth::Strategies::IrmHealth::NoAuthorizationCodeError) { strategy.send(:with_authorization_code!) {} }
+  #   end
+  # end
 
-    test 'throws an error on calling build_access_token' do
-      assert_raises(OmniAuth::Strategies::Facebook::NoAuthorizationCodeError) { strategy.send(:with_authorization_code!) {} }
-    end
-  end
+  # class CookiePresentTest < TestCase
+  #   def setup(algo = nil)
+  #     super()
+  #     @payload = {
+  #       'algorithm' => algo || 'HMAC-SHA256',
+  #       'code' => 'm4c0d3z',
+  #       'issued_at' => Time.now.to_i,
+  #       'user_id' => '123456'
+  #     }
+  #
+  #     @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
+  #   end
+  #
+  #   test 'parses the access code out from the cookie' do
+  #     assert_equal @payload, strategy.send(:signed_request_from_cookie)
+  #   end
+  #
+  #   test 'throws an error if the algorithm is unknown' do
+  #     setup('UNKNOWN-ALGO')
+  #     assert_equal "unknown algorithm: UNKNOWN-ALGO", assert_raises(OmniAuth::Strategies::IrmHealth::UnknownSignatureAlgorithmError) { strategy.send(:signed_request_from_cookie) }.message
+  #   end
+  # end
 
-  class CookiePresentTest < TestCase
-    def setup(algo = nil)
-      super()
-      @payload = {
-        'algorithm' => algo || 'HMAC-SHA256',
-        'code' => 'm4c0d3z',
-        'issued_at' => Time.now.to_i,
-        'user_id' => '123456'
-      }
+  # class EmptySignedRequestTest < TestCase
+  #   def setup
+  #     super
+  #     @request.stubs(:params).returns({'signed_request' => ''})
+  #   end
+  #
+  #   test 'empty param' do
+  #     assert_equal nil, strategy.send(:signed_request_from_cookie)
+  #   end
+  # end
 
-      @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
-    end
+  # class MissingCodeInParamsRequestTest < TestCase
+  #   def setup
+  #     super
+  #     @request.stubs(:params).returns({})
+  #   end
+  #
+  #   test 'calls fail! when a code is not included in the params' do
+  #     strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
+  #     strategy.callback_phase
+  #   end
+  # end
 
-    # test 'parses the access code out from the cookie' do
-    #   assert_equal @payload, strategy.send(:signed_request_from_cookie)
-    # end
-
-    # test 'throws an error if the algorithm is unknown' do
-    #   setup('UNKNOWN-ALGO')
-    #   assert_equal "unknown algorithm: UNKNOWN-ALGO", assert_raises(OmniAuth::Strategies::Facebook::UnknownSignatureAlgorithmError) { strategy.send(:signed_request_from_cookie) }.message
-    # end
-  end
-
-  class EmptySignedRequestTest < TestCase
-    def setup
-      super
-      @request.stubs(:params).returns({'signed_request' => ''})
-    end
-
-    # test 'empty param' do
-    #   assert_equal nil, strategy.send(:signed_request_from_cookie)
-    # end
-  end
-
-  class MissingCodeInParamsRequestTest < TestCase
-    def setup
-      super
-      @request.stubs(:params).returns({})
-    end
-
-    # test 'calls fail! when a code is not included in the params' do
-    #   strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
-    #   strategy.callback_phase
-    # end
-  end
-
-  class MissingCodeInCookieRequestTest < TestCase
-    def setup(algo = nil)
-      super()
-      @payload = {
-        'algorithm' => algo || 'HMAC-SHA256',
-        'code' => nil,
-        'issued_at' => Time.now.to_i,
-        'user_id' => '123456'
-      }
-
-      @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
-    end
-
-    # test 'calls fail! when a code is not included in the cookie' do
-    #   strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
-    #   strategy.callback_phase
-    # end
-  end
+  # class MissingCodeInCookieRequestTest < TestCase
+  #   def setup(algo = nil)
+  #     super()
+  #     @payload = {
+  #       'algorithm' => algo || 'HMAC-SHA256',
+  #       'code' => nil,
+  #       'issued_at' => Time.now.to_i,
+  #       'user_id' => '123456'
+  #     }
+  #
+  #     @request.stubs(:cookies).returns({"fbsr_#{@client_id}" => signed_request(@payload, @client_secret)})
+  #   end
+  #
+  #   test 'calls fail! when a code is not included in the cookie' do
+  #     strategy.expects(:fail!).times(1).with(:no_authorization_code, kind_of(Exception))
+  #     strategy.callback_phase
+  #   end
+  # end
 end

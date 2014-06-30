@@ -31,8 +31,8 @@ class TestCase < Minitest::Test
 end
 
 class StrategyTestCase < TestCase
-    IRM_AUTH_BASE_URL = 'http://localhost:4000'
-    IRM_OPHIES_BASE_URL = 'http://localhost:3000'
+    IRM_AUTH_BASE_URL = 'http://auth.irm.kr'
+    IRM_OPHIES_BASE_URL = 'https://ophies.irm.kr'
 
   def setup
 

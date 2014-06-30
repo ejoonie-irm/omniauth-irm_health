@@ -10,9 +10,9 @@ module OmniAuth
       class NoAuthorizationCodeError < StandardError; end
       class UnknownSignatureAlgorithmError < NotImplementedError; end
 
-      BASE_SCOPE_URL = 'http://localhost:4000' # FIXME
-      OPHIES_BASE_URL = "http://localhost:3000"
-      BASE_SCOPES = %w[email profile study]
+      BASE_SCOPE_URL = 'http://auth.irm.kr' # FIXME to https
+      OPHIES_BASE_URL = 'https://ophies.irm.kr'
+      BASE_SCOPES = %w[email profile study series instance docset]
       DEFAULT_SCOPE = 'email'
       DEFAULT_ACCESS_TYPE = 'offline'
 
@@ -21,7 +21,7 @@ module OmniAuth
       option :authorize_options, [:scope, :access_type, :state]
 
       option :client_options, {
-        :site => BASE_SCOPE_URL, # FIXME
+        :site => BASE_SCOPE_URL,
         :authorize_url => '/o/oauth2/auth',
         :token_url => '/o/oauth2/token'
       }
@@ -62,7 +62,12 @@ module OmniAuth
             # urls: { study: https://ophies.irm.kr/v1/studies }
           'name' => raw_info['username'],
           'email' => raw_info['email'],
-          'urls' => { 'Irm' => raw_info[''] }
+          'urls' => raw_info['urls']
+              # study: "https://ophies.irm.kr/v1/studies",
+              # series: "https://ophies.irm.kr/v1/series",
+              # instance: "https://ophies.irm.kr/v1/instances",
+              # patients: "https://ophies.irm.kr/v1/patients",
+              # docsets: "https://ophies.irm.kr/v1/docsets"
         })
       end
 
@@ -123,7 +128,6 @@ module OmniAuth
           params[:scope] ||= DEFAULT_SCOPE
           params[:access_type] = DEFAULT_ACCESS_TYPE if params[:access_type].nil?
           session['omniauth.state'] = params[:state] if params[:state]
-
         end
       end
 

@@ -5,7 +5,7 @@ If you were looking for the one, please go to https://github.com/mkdynamic/omnia
 We do appologize inconvenience.
 
 
-# OmniAuth IrmHealth  &nbsp;[![Build Status]]
+# OmniAuth IrmHealth  &nbsp;[![Gem Version](https://badge.fury.io/rb/omniauth-irm_health.png)](http://badge.fury.io/rb/omniauth-irm_health)
 
 **These notes are based on master, please see tags for README pertaining to specific releases.**
 

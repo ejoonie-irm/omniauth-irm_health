@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors  = ['Youngjoon Choi']
   s.email    = ['ejoonie@irm.kr']
   s.summary  = 'Irm Health OAuth2 Strategy for OmniAuth'
-  s.homepage = 'https://github.com/irm/omniauth-irm_health'
+  s.homepage = 'https://github.com/ejoonie-irm/omniauth-irm_health'
   s.license  = 'MIT'
 
   s.files         = `git ls-files`.split("\n")

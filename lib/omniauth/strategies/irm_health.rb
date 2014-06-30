@@ -10,8 +10,9 @@ module OmniAuth
       class NoAuthorizationCodeError < StandardError; end
       class UnknownSignatureAlgorithmError < NotImplementedError; end
 
-      BASE_SCOPE_URL = 'http://auth.irm.kr' # FIXME to https
+
       OPHIES_BASE_URL = 'https://ophies.irm.kr'
+      BASE_SCOPE_URL = OPHIES_BASE_URL # 'http://auth.irm.kr' # FIXME to https
       BASE_SCOPES = %w[email profile study series instance docset]
       DEFAULT_SCOPE = 'email'
       DEFAULT_ACCESS_TYPE = 'offline'

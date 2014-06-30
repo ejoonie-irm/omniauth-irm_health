@@ -1,13 +1,13 @@
-An omniauth strategy for IRM Cloud Healthcare
+An Omniauth strategy for IRM Healthcare Cloud
 
-** Copied from OmniAuth Facebook. This is not for Facebook !! 
-If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
-We do appologize inconvenience.
+**CAUTION
+**This is not a release version yet and its source code copied from OmniAuth Facebook. This is not for Omniauth Facebook !!
+**If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
+**We do appologize inconvenience.
 
 
 # OmniAuth IrmHealth  &nbsp;[![Gem Version](https://badge.fury.io/rb/omniauth-irm_health.png)](http://badge.fury.io/rb/omniauth-irm_health)
 
-**These notes are based on master, please see tags for README pertaining to specific releases.**
 
 IrmHealth OAuth2 Strategy for OmniAuth.
 
@@ -23,13 +23,13 @@ Then `bundle install`.
 
 ## Usage
 
-`OmniAuth::Strategies::Facebook` is simply a Rack middleware. Read the OmniAuth docs for detailed instructions: https://github.com/intridea/omniauth.
+`OmniAuth::Strategies::IrmHealth` is simply a Rack middleware. Read the OmniAuth docs for detailed instructions: https://github.com/intridea/omniauth.
 
 Here's a quick example, adding the middleware to a Rails app in `config/initializers/omniauth.rb`:
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :facebook, ENV['IRM_KEY'], ENV['IRM_SECRET']
+  provider :irm_health, ENV['IRM_KEY'], ENV['IRM_SECRET']
 end
 ```
 
@@ -52,8 +52,8 @@ For example, to request `email`, `user_birthday` and `read_stream` permissions a
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET'],
-           :scope => 'email,user_birthday,read_stream', :display => 'popup'
+  provider :irm_health, ENV['IRM_KEY'], ENV['IRM_SECRET'],
+           :scope => 'email'
 end
 ```
 

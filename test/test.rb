@@ -13,11 +13,11 @@ class ClientTest < StrategyTestCase
   end
 
   test 'has correct authorize url' do
-    assert_equal '/o/oauth2/auth', strategy.client.options[:authorize_url]
+    assert_equal '/auth/oauth2/auth', strategy.client.options[:authorize_url]
   end
 
   test 'has correct token url' do
-    assert_equal '/o/oauth2/token', strategy.client.options[:token_url]
+    assert_equal '/auth/oauth2/token', strategy.client.options[:token_url]
   end
 end
 

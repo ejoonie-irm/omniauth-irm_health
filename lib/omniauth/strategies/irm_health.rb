@@ -23,8 +23,8 @@ module OmniAuth
 
       option :client_options, {
         :site => BASE_SCOPE_URL,
-        :authorize_url => '/o/oauth2/auth',
-        :token_url => '/o/oauth2/token'
+        :authorize_url => '/auth/oauth2/auth',
+        :token_url => '/auth/oauth2/token'
       }
 
       # from google oauth2

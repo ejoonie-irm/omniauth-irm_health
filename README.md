@@ -1,10 +1,5 @@
 An Omniauth strategy for IRM Healthcare Cloud
 
-**CAUTION
-**This is not a release version yet and its source code copied from OmniAuth Facebook. This is not for Omniauth Facebook !!
-**If you were looking for the one, please go to https://github.com/mkdynamic/omniauth-facebook.
-**We do appologize inconvenience.
-
 
 # OmniAuth IrmHealth  &nbsp;[![Gem Version](https://badge.fury.io/rb/omniauth-irm_health.png)](http://badge.fury.io/rb/omniauth-irm_health)
 

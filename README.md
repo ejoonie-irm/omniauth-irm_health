@@ -1,5 +1,6 @@
 An Omniauth strategy for IRM Healthcare Cloud
 
+gitlab-ci-test
 
 # OmniAuth IrmHealth  &nbsp;[![Gem Version](https://badge.fury.io/rb/omniauth-irm_health.png)](http://badge.fury.io/rb/omniauth-irm_health)
 
